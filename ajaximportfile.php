@@ -74,7 +74,14 @@ if (isset($_POST) || isset($_FILES)) {
 			
 			$statements = splitQueryText($contents);
 		} else {
-			$statements = file($file);
+      // coderofsalvation@ Tue Dec 24 11:42:20 CET 2013
+      // file() doesnt work with multiline csv columns
+      // actually, it should be questioned whether csv need
+      // to be parsed manually instead of fgetcsv in the firstplace :)
+      $csv  = file_get_contents($file);
+      $csv  = str_replace( array("\r\n", "\n"), "\n", $csv ); //  window/linux compat
+      $csv  = str_replace( "\"\n", "\"\"\n", $csv ); // quickndirty way to make multiline explode on next line go fine 
+      $statements = explode("\"\n",$csv );
 			
 			// see previous comment
 			if (sizeof($statements) == 1 && strpos($statements[0], "\r") > 0) {
