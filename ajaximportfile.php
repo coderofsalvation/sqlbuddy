@@ -61,18 +61,11 @@ if (isset($_POST) || isset($_FILES)) {
 	
 	if (isset($file) && is_uploaded_file($file)) {
 		if (isset($format) && $format == "SQL") {
-			$lines = file($file);
+      $lines  = file_get_contents($file);
+      $lines  = str_replace( array("\r\n", "\n"), "\n", $lines ); //  window/linux compat
+      $lines  = str_replace( "\"\n", "\"\"\n", $lines ); // quickndirty way to make multiline explode on next line go fine 
+			$statements = explode("\"\n",$lines );
 			
-			// the file() function doesn't handle mac line endings correctly
-			if (sizeof($lines) == 1 && strpos($lines[0], "\r") > 0) {
-				$lines = explode("\r", $lines[0]);
-			}
-			
-			$commentFree = array_map("stripCommentLines", $lines);
-			
-			$contents = trim(implode('', $commentFree));
-			
-			$statements = splitQueryText($contents);
 		} else {
       // coderofsalvation@ Tue Dec 24 11:42:20 CET 2013
       // file() doesnt work with multiline csv columns
